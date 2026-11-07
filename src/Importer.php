@@ -119,7 +119,7 @@ final class Importer {
 			static fn( $m ) => (string) ( $c[ $m[1] ] ?? $m[0] ),
 			(string) $row['message']
 		);
-		$ip      = (string) apply_filters( 'shakewell_activity_log_ip', (string) ( $c['_server_remote_addr'] ?? '' ) );
+		$ip      = (string) apply_filters( 'shakewell_activity_log_ip', (string) ( $c['_server_remote_addr'] ?? '' ), 'import' );
 		$type    = (string) ( $c['_post_type'] ?? ( isset( $c['_edited_user_id'] ) ? 'user' : '' ) );
 		return array(
 			'time'        => $row['date'],

@@ -36,7 +36,7 @@ Each entry holds: time (UTC), user ID and login at that moment, role, action, ob
 
 = Privacy =
 
-The log contains usernames and, unless you turn it off, IP addresses. Both are personal data in many places. Turn IP storage off with `add_filter( 'shakewell_activity_log_ip', '__return_empty_string' );`. The address is the one PHP reports (`REMOTE_ADDR`). Behind a proxy or CDN that is the proxy's address; return the real client address from the same `shakewell_activity_log_ip` filter if you trust your proxy's header. Tell your users the log exists in your privacy policy. Entries are deleted after the retention period.
+The log contains usernames and, unless you turn it off, IP addresses. Both are personal data in many places. Turn IP storage off with `add_filter( 'shakewell_activity_log_ip', '__return_empty_string' );`. The address is the one PHP reports (`REMOTE_ADDR`). Behind a proxy or CDN that is the proxy's address; return the real client address from the same `shakewell_activity_log_ip` filter if you trust your proxy's header. The filter receives the address and a second argument, `'live'` for a request being logged or `'import'` for a row imported from Simple History. Only replace the address when the second argument is `'live'`: an imported row carries a historical address that the current request knows nothing about. Blanking the address, as in the example above, is safe for both. Tell your users the log exists in your privacy policy. Entries are deleted after the retention period.
 
 = Retention =
 

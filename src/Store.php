@@ -112,7 +112,7 @@ final class Store {
 	 */
 	private static function ip(): string {
 		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-		$ip = (string) apply_filters( 'shakewell_activity_log_ip', $ip );
+		$ip = (string) apply_filters( 'shakewell_activity_log_ip', $ip, 'live' );
 		return false === filter_var( $ip, FILTER_VALIDATE_IP ) ? '' : $ip;
 	}
 
