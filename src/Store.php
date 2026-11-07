@@ -132,7 +132,7 @@ final class Store {
 		$table  = self::table();
 		// ponytail: at most 100 batches (100,000 rows) per run; the next daily run continues.
 		for ( $i = 0; $i < 100; $i++ ) {
-			$deleted = $wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE time < %s LIMIT %d", $cutoff, self::BATCH ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$deleted = $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE time < %s LIMIT %d', $table, $cutoff, self::BATCH ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			if ( (int) $deleted < self::BATCH ) {
 				break;
 			}
@@ -187,9 +187,9 @@ final class Store {
 		global $wpdb;
 		list( $where, $args ) = self::where( $filters );
 		$table                = self::table();
-		$args[]               = $limit;
-		$args[]               = $offset;
-		return (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE {$where} ORDER BY id DESC LIMIT %d OFFSET %d", $args ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$args                 = array_merge( array( $table ), $args, array( $limit, $offset ) );
+		// $where is built from fixed fragments with placeholders only; every value is bound here.
+		return (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i WHERE {$where} ORDER BY id DESC LIMIT %d OFFSET %d", $args ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -201,8 +201,8 @@ final class Store {
 		global $wpdb;
 		list( $where, $args ) = self::where( $filters );
 		$table                = self::table();
-		$sql                  = "SELECT COUNT(*) FROM {$table} WHERE {$where}";
-		return (int) $wpdb->get_var( $args ? $wpdb->prepare( $sql, $args ) : $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
+		$args                 = array_merge( array( $table ), $args );
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$where}", $args ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 	}
 
 	/**
@@ -215,6 +215,6 @@ final class Store {
 		global $wpdb;
 		$col   = 'action' === $col ? 'action' : 'user_login';
 		$table = self::table();
-		return array_filter( (array) $wpdb->get_col( "SELECT DISTINCT {$col} FROM {$table} ORDER BY {$col} LIMIT 500" ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return array_filter( (array) $wpdb->get_col( $wpdb->prepare( 'SELECT DISTINCT %i FROM %i ORDER BY %i LIMIT 500', $col, $table, $col ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 }
