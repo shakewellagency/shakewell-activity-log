@@ -188,6 +188,21 @@ final class PluginTest extends WP_UnitTestCase {
 		$this->assertSame( '', $this->rows( 'plugin_activated' )[0]['ip'] );
 	}
 
+	public function test_ip_filter_tells_live_from_import(): void {
+		$seen = array();
+		add_filter(
+			'shakewell_activity_log_ip',
+			static function ( $ip, $context ) use ( &$seen ) {
+				$seen[] = $context;
+				return $ip;
+			},
+			10,
+			2
+		);
+		do_action( 'switch_theme', 'T', wp_get_theme( get_stylesheet() ) );
+		$this->assertSame( array( 'live' ), $seen );
+	}
+
 	public function test_purge_removes_only_old_rows(): void {
 		global $wpdb;
 		Store::insert( array( 'time' => gmdate( 'Y-m-d H:i:s', time() - 400 * DAY_IN_SECONDS ), 'action' => 'old' ) );

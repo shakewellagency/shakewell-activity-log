@@ -58,8 +58,8 @@ final class Importer {
 		$contexts = $wpdb->prefix . 'simple_history_contexts';
 		$wpdb->suppress_errors( true );
 		$wpdb->last_error = '';
-		$wpdb->get_var( "SELECT 1 FROM {$history} LIMIT 1" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->get_var( "SELECT 1 FROM {$contexts} LIMIT 1" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->get_var( $wpdb->prepare( 'SELECT 1 FROM %i LIMIT 1', $history ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->get_var( $wpdb->prepare( 'SELECT 1 FROM %i LIMIT 1', $contexts ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$missing = '' !== $wpdb->last_error;
 		$wpdb->suppress_errors( false );
 		if ( $missing ) {
@@ -74,7 +74,7 @@ final class Importer {
 		$last = 0;
 		$log  = Store::table();
 		do {
-			$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, date, logger, message FROM {$history} WHERE id > %d ORDER BY id ASC LIMIT %d", $last, self::BATCH ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT id, date, logger, message FROM %i WHERE id > %d ORDER BY id ASC LIMIT %d', $history, $last, self::BATCH ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			if ( ! $rows ) {
 				break;
 			}
@@ -84,10 +84,10 @@ final class Importer {
 			$in   = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 
 			$sources = array_map( static fn( $id ) => "simple_history:$id", $ids );
-			$done    = $wpdb->get_col( $wpdb->prepare( "SELECT source FROM {$log} WHERE source IN (" . implode( ',', array_fill( 0, count( $sources ), '%s' ) ) . ')', $sources ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$done    = $wpdb->get_col( $wpdb->prepare( 'SELECT source FROM %i WHERE source IN (' . implode( ',', array_fill( 0, count( $sources ), '%s' ) ) . ')', array_merge( array( $log ), $sources ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 			$ctx = array();
-			foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT history_id, `key`, value FROM {$contexts} WHERE history_id IN ($in)", $ids ), ARRAY_A ) as $c ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT history_id, `key`, value FROM %i WHERE history_id IN ($in)", array_merge( array( $contexts ), $ids ) ), ARRAY_A ) as $c ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 				$ctx[ $c['history_id'] ][ $c['key'] ] = $c['value'];
 			}
 
@@ -119,7 +119,7 @@ final class Importer {
 			static fn( $m ) => (string) ( $c[ $m[1] ] ?? $m[0] ),
 			(string) $row['message']
 		);
-		$ip      = (string) apply_filters( 'shakewell_activity_log_ip', (string) ( $c['_server_remote_addr'] ?? '' ) );
+		$ip      = (string) apply_filters( 'shakewell_activity_log_ip', (string) ( $c['_server_remote_addr'] ?? '' ), 'import' );
 		$type    = (string) ( $c['_post_type'] ?? ( isset( $c['_edited_user_id'] ) ? 'user' : '' ) );
 		return array(
 			'time'        => $row['date'],
