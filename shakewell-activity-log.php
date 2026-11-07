@@ -3,7 +3,7 @@
  * Plugin Name:       Shakewell Activity Log
  * Plugin URI:        https://github.com/shakewellagency/shakewell-activity-log
  * Description:       A record of who changed what in wp-admin that an administrator cannot quietly edit.
- * Version:           0.1.0
+ * Version:           0.1.1
  * Requires at least: 6.5
  * Requires PHP:      8.1
  * Author:            Shakewell
@@ -19,7 +19,7 @@ namespace Shakewell\ActivityLog;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION = '0.1.0';
+const VERSION = '0.1.1';
 const FILE    = __FILE__;
 
 require_once __DIR__ . '/src/Store.php';

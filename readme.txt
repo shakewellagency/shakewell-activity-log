@@ -1,10 +1,10 @@
 === Shakewell Activity Log ===
-Contributors: shakewell
+Contributors: shakewellagency
 Tags: activity log, audit log, security, logging, accountability
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.1.0
+Stable tag: 0.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,7 +36,7 @@ Each entry holds: time (UTC), user ID and login at that moment, role, action, ob
 
 = Privacy =
 
-The log contains usernames and, unless you turn it off, IP addresses. Both are personal data in many places. Turn IP storage off with `add_filter( 'shakewell_activity_log_ip', '__return_empty_string' );`. Tell your users the log exists in your privacy policy. Entries are deleted after the retention period.
+The log contains usernames and, unless you turn it off, IP addresses. Both are personal data in many places. Turn IP storage off with `add_filter( 'shakewell_activity_log_ip', '__return_empty_string' );`. The address is the one PHP reports (`REMOTE_ADDR`). Behind a proxy or CDN that is the proxy's address; return the real client address from the same `shakewell_activity_log_ip` filter if you trust your proxy's header. Tell your users the log exists in your privacy policy. Entries are deleted after the retention period.
 
 = Retention =
 
@@ -91,6 +91,9 @@ Changes made directly in the database, by WP-CLI scripts that bypass WordPress f
 Please do not open a public issue. Follow SECURITY.md in the plugin's repository.
 
 == Changelog ==
+
+= 0.1.1 =
+* Documented the IP address behind a proxy or CDN, and the readme contributor field.
 
 = 0.1.0 =
 * First release.
